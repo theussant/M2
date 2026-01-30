@@ -13,20 +13,20 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden; /* Essencial para o celular não criar rolagem */
-            touch-action: none; /* Melhora a resposta do toque */
+            overflow: hidden; 
+            touch-action: none; 
         }
 
         .container {
             text-align: center;
-            width: 90%; /* Ocupa 90% da largura da tela */
-            max-width: 400px; /* Mas não passa de 400px */
+            width: 90%; 
+            max-width: 400px;
             background-color: #ffffff;
             padding: 30px 20px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             position: relative;
-            z-index: 10; /* Garante que o container fique acima */
+            z-index: 10; 
         }
 
         .couple-image {
@@ -40,9 +40,16 @@
 
         h1 {
             color: #d63384;
-            font-size: 1.8em; /* Tamanho bom para celular */
-            margin-bottom: 25px;
+            font-size: 1.8em; 
+            margin-bottom: 20px;
             line-height: 1.3;
+        }
+
+        p.final-text {
+            color: #555;
+            font-size: 1.1em;
+            margin-top: 15px;
+            font-weight: 500;
         }
 
         .buttons-container {
@@ -50,7 +57,7 @@
             justify-content: center;
             gap: 15px;
             margin-top: 20px;
-            min-height: 60px; /* Reserva espaço para os botões */
+            min-height: 60px; 
         }
 
         .btn {
@@ -61,21 +68,34 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            -webkit-tap-highlight-color: transparent; /* Remove o flash azul no toque */
+            -webkit-tap-highlight-color: transparent; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-si {
             background-color: #28a745;
             color: white;
-            z-index: 20; /* O Sim sempre fica clicável */
+            z-index: 20; 
         }
 
         .btn-no {
             background-color: #dc3545;
             color: white;
-            position: relative; /* Começa relativo, vira fixed depois */
-            transition: top 0.2s, left 0.2s; /* Movimento suave */
+            position: relative; 
+            transition: top 0.2s, left 0.2s; 
+        }
+
+        /* Estilo do botão do WhatsApp */
+        .btn-whatsapp {
+            background-color: #25D366; 
+            color: white;
+            margin-top: 15px;
+            font-size: 1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         #response-message {
@@ -88,10 +108,21 @@
             max-width: 300px;
             border-radius: 15px;
             margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .music-hint {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
+
+    <audio id="bgm" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="container" id="main-container">
         <div id="question-box">
@@ -103,11 +134,16 @@
                 <button class="btn btn-si" id="siBtn">¡SÍ!</button>
                 <button class="btn btn-no" id="noBtn">NO</button>
             </div>
+            <div class="music-hint">🎵 Toca la pantalla para música</div>
         </div>
 
         <div id="response-message">
-            <h1>Si presionaste SÍ, mándame una foto de tu sonrisa por WhatsApp ¡Sabía que dirías que SÍ! <br> Te amo ❤️</h1>
-             <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif" alt="Beso">
+            <h1>¡Sabía que dirías que SÍ! <br> Te amo ❤️</h1>
+            
+            <p class="final-text">Si presionaste SÍ, mándame una foto de tu sonrisa por WhatsApp.</p>
+
+            <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif" alt="Beso">
+
         </div>
     </div>
 
@@ -116,42 +152,48 @@
         const siBtn = document.getElementById('siBtn');
         const questionBox = document.getElementById('question-box');
         const responseMessage = document.getElementById('response-message');
+        const audio = document.getElementById('bgm');
 
-        // Lógica para mover o botão (funciona para mouse E toque)
+        // --- LÓGICA DO ÁUDIO ---
+        function playAudio() {
+            audio.play().catch(error => {
+                console.log("Aguardando interação para tocar");
+            });
+            // Remove o listener para não reiniciar o áudio toda vez que tocar
+            document.body.removeEventListener('click', playAudio);
+            document.body.removeEventListener('touchstart', playAudio);
+        }
+
+        // Tenta tocar no primeiro toque ou clique na tela
+        document.body.addEventListener('click', playAudio);
+        document.body.addEventListener('touchstart', playAudio);
+
+        // --- LÓGICA DO BOTÃO FUGITIVO ---
         function moveButton(e) {
-            // Evita o comportamento padrão (como zoom ou seleção)
             if(e) e.preventDefault();
-
-            // Pega o tamanho da janela e do botão
             const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
 
-            // Define posição fixed para ele se soltar do container
             noBtn.style.position = 'fixed';
 
-            // Calcula nova posição aleatória
-            // Math.random() * (LarguraTotal - LarguraBotão - Margem)
             const newLeft = Math.random() * (windowWidth - btnWidth - 20);
             const newTop = Math.random() * (windowHeight - btnHeight - 20);
 
-            // Aplica as novas coordenadas
             noBtn.style.left = newLeft + 'px';
             noBtn.style.top = newTop + 'px';
         }
 
-        // Eventos para Desktop (Mouse)
         noBtn.addEventListener('mouseover', moveButton);
-        
-        // Eventos para Celular (Toque)
         noBtn.addEventListener('touchstart', moveButton);
-        noBtn.addEventListener('click', moveButton); // Fallback caso o toque passe
+        noBtn.addEventListener('click', moveButton);
 
-        // Lógica do botão SIM
+        // --- LÓGICA DO SIM ---
         siBtn.addEventListener('click', function() {
             questionBox.style.display = 'none';
             responseMessage.style.display = 'block';
+            playAudio(); // Garante o play caso ainda não tenha tocado
         });
     </script>
 
